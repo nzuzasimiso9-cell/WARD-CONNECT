@@ -1,0 +1,1 @@
+WardConnect is a community communication platform that allows residents to report local problems, support issues affecting them, and automatically prioritises problems based on the number of residents affected. It also provides a councillor dashboard for tracking and updating community issues.
