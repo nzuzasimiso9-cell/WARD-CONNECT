@@ -1,0 +1,45 @@
+<!doctype html>
+<html><head><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font-family:Arial,sans-serif;margin:0;background:#f5f7fb;color:#172033}header{background:#172033;color:white;padding:20px}
+main{padding:16px}.card{background:white;border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 2px 8px #0001}
+button{padding:12px;border:0;border-radius:10px;background:#172033;color:white;font-weight:bold}
+input,textarea,select{width:100%;box-sizing:border-box;padding:12px;margin:6px 0 12px;border:1px solid #ccd2dc;border-radius:10px}
+.bar{height:8px;background:#e8ebf0;border-radius:9px;overflow:hidden}.fill{height:100%;background:#172033}
+.badge{display:inline-block;padding:5px 8px;border-radius:99px;background:#e9eef8;font-size:12px;font-weight:bold}
+</style></head>
+<body><header><b>WARD 24 • COMMUNITY PLATFORM</b><h1>WardConnect</h1><div>Community problems, organised by community priority.</div></header>
+<main>
+<button onclick="toggleRole()">Switch to Councillor</button>
+<section id="resident">
+<div class="card"><h2>Report a Problem</h2>
+<form onsubmit="addReport(event)">
+<label>Problem title</label><input id="title" required placeholder="e.g. Broken streetlights">
+<label>Category</label><select id="cat"><option>Water</option><option>Roads</option><option>Electricity</option><option>Waste</option><option>Safety</option><option>Other</option></select>
+<label>Description</label><textarea id="desc" required placeholder="Describe the problem..."></textarea>
+<button>Submit Report</button></form></div>
+<h2>Community Priorities</h2><div id="reports"></div>
+</section>
+<section id="councillor" style="display:none"><div class="card"><h2>Councillor Dashboard</h2><div id="stats"></div></div><div id="admin"></div></section>
+</main>
+<script>
+let reports=[
+{id:1,title:"Water outage in Section A",cat:"Water",desc:"Residents have had no running water for several days.",n:147,status:"Under Review"},
+{id:2,title:"Large potholes on Main Road",cat:"Roads",desc:"Several potholes are making the road difficult to use.",n:96,status:"Assigned"},
+{id:3,title:"Broken streetlights",cat:"Electricity",desc:"Multiple streetlights are not working at night.",n:42,status:"Reported"},
+{id:4,title:"Illegal dumping near the community hall",cat:"Waste",desc:"Waste is accumulating near the hall.",n:18,status:"Reported"}];
+let councillor=false;
+function esc(s){return String(s).replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]))}
+function priority(n){return n>=100?"Highest":n>=50?"High":n>=20?"Medium":"Lower"}
+function render(){
+ reports.sort((a,b)=>b.n-a.n);
+ document.getElementById("reports").innerHTML=reports.map((r,i)=>`<div class="card"><span class="badge">${i==0?"#1 ":""}${priority(r.n)} Priority</span><h3>${esc(r.title)}</h3><small>${esc(r.cat)}</small><p>${esc(r.desc)}</p><div class="bar"><div class="fill" style="width:${Math.min(100,r.n/150*100)}%"></div></div><p><b>${r.n} residents affected</b> • ${esc(r.status)}</p><button onclick="support(${r.id})">+ I'm affected</button></div>`).join("");
+ document.getElementById("admin").innerHTML=reports.map((r,i)=>`<div class="card"><b>PRIORITY #${i+1}</b><h3>${esc(r.title)}</h3><p>${r.n} residents affected</p><select onchange="status(${r.id},this.value)"><option ${r.status=="Reported"?"selected":""}>Reported</option><option ${r.status=="Under Review"?"selected":""}>Under Review</option><option ${r.status=="Assigned"?"selected":""}>Assigned</option><option ${r.status=="In Progress"?"selected":""}>In Progress</option><option ${r.status=="Resolved"?"selected":""}>Resolved</option></select></div>`).join("");
+ document.getElementById("stats").innerHTML=`<p><b>${reports.filter(r=>r.status!="Resolved").length}</b> active issues</p><p><b>${reports.reduce((a,r)=>a+r.n,0)}</b> residents affected</p><p><b>${reports[0].n}</b> people affected by the top issue</p>`;
+}
+function support(id){reports.find(r=>r.id==id).n++;render()}
+function status(id,v){reports.find(r=>r.id==id).status=v;render()}
+function addReport(e){e.preventDefault();reports.push({id:Date.now(),title:title.value,cat:cat.value,desc:desc.value,n:1,status:"Reported"});e.target.reset();render()}
+function toggleRole(){councillor=!councillor;resident.style.display=councillor?"none":"block";document.getElementById("councillor").style.display=councillor?"block":"none";event.target.textContent=councillor?"Switch to Resident":"Switch to Councillor";render()}
+render();
+</script></body></html>
